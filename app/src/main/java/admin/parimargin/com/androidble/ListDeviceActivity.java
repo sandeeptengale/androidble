@@ -19,7 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -28,7 +28,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Handler;
 
 public class ListDeviceActivity extends AppCompatActivity {
     public static final String TAG = ListDeviceActivity.class.getName();
@@ -51,7 +50,7 @@ public class ListDeviceActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_list_device);
 
         if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, "Bluetooth LE is not supported", Toast.LENGTH_SHORT);
@@ -101,6 +100,7 @@ public class ListDeviceActivity extends AppCompatActivity {
             scanLeDevices(true);
         }
 
+        //------------Click listener-------------------
         scanDevices.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,6 +112,16 @@ public class ListDeviceActivity extends AppCompatActivity {
                     deviceListAdapter.clear();
                     Toast.makeText(getApplicationContext(), "Turn on Bluetooth", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        deviceInfoList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                BluetoothDevice device = (BluetoothDevice) deviceListAdapter.getItem(position);
+                Intent intent = new Intent(ListDeviceActivity.this, DeviceDetailsActivity.class);
+                intent.putExtra("SELECTED_BLUETOOTH_DEVICE", device);
+                startActivity(intent);
             }
         });
     }
