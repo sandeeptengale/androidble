@@ -87,7 +87,6 @@ public class ListDeviceActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-
         if(bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(intent, REQUEST_BT_ENABLE);
@@ -105,12 +104,26 @@ public class ListDeviceActivity extends AppCompatActivity {
         scanDevices.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                deviceListAdapter.clear();
+                deviceListAdapter.notifyDataSetChanged();
                 if(bluetoothAdapter.isEnabled()) {
                     scanLeDevices(true);
+                } else if(bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                    deviceListAdapter.clear();
+                    Toast.makeText(getApplicationContext(), "Turn on Bluetooth", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
+            scanLeDevices(false);
+            deviceListAdapter.clear();
+            deviceListAdapter.notifyDataSetChanged();
+        }
     }
 
     private void scanLeDevices(boolean enable) {
@@ -118,40 +131,14 @@ public class ListDeviceActivity extends AppCompatActivity {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (Build.VERSION.SDK_INT < 21) {
-                        bluetoothAdapter.stopLeScan(startLeScan);
-                    } else {
-                        bluetoothLeScanner.stopScan(scanCallback);
-                    }
+                    bluetoothLeScanner.stopScan(scanCallback);
                 }
             }, SCAN_PERIOD);
-            if(Build.VERSION.SDK_INT < 21) {
-                bluetoothAdapter.startLeScan(startLeScan);
-            } else {
-                bluetoothLeScanner.startScan(scanCallback);
-            }
+            bluetoothLeScanner.startScan(scanCallback);
         } else {
-            if(Build.VERSION.SDK_INT < 21) {
-                bluetoothAdapter.stopLeScan(startLeScan);
-            } else {
-                bluetoothLeScanner.stopScan(scanCallback);
-            }
+            bluetoothLeScanner.stopScan(scanCallback);
         }
     }
-
-    // callback for Bluetooth le scan
-    private BluetoothAdapter.LeScanCallback startLeScan =
-            new BluetoothAdapter.LeScanCallback() {
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "DeviceNameLowerAPI: " + device.getName());
-                        }
-                    });
-                }
-            };
 
     //callback for higher API BLuetooth le scan
     private ScanCallback scanCallback =
