@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,6 +22,7 @@ public class DeviceDetailsActivity extends AppCompatActivity{
     public static final String TAG = DeviceDetailsActivity.class.getName();
     BluetoothDevice device;
     BluetoothGatt bluetoothGatt;
+    List<BluetoothGattCharacteristic> characteristics;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,17 +73,38 @@ public class DeviceDetailsActivity extends AppCompatActivity{
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            List<BluetoothGattService> services = gatt.getServices();
-            if(services.size() > 0) {
-                for(BluetoothGattService thisService: services) {
-                    Log.d(TAG, "ServiceDetails: " + thisService.getUuid());
-                }
-            }
+            final List<BluetoothGattService> services = gatt.getServices();
+            characteristics = new ArrayList<BluetoothGattCharacteristic>();
+            characteristics.add(services.get(1).getCharacteristics().get(0));
+            characteristics.add(services.get(1).getCharacteristics().get(1));
+            characteristics.add(services.get(1).getCharacteristics().get(2));
+
+            characteristics.add(services.get(2).getCharacteristics().get(0));
+            characteristics.add(services.get(2).getCharacteristics().get(1));
+            characteristics.add(services.get(2).getCharacteristics().get(2));
+
+            characteristics.add(services.get(3).getCharacteristics().get(0));
+            characteristics.add(services.get(3).getCharacteristics().get(1));
+            characteristics.add(services.get(3).getCharacteristics().get(2));
+            requesReadCharacteristics(gatt);
+        }
+
+        public void requesReadCharacteristics(BluetoothGatt gatt) {
+            gatt.readCharacteristic(characteristics.get(characteristics.size() - 1));
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicRead(gatt, characteristic, status);
+            if (status == 0 ) {
+                Log.d(TAG, "DeviceNameFetchFromDevice: " + characteristic.getValue());
+                characteristics.remove(characteristics.get(characteristics.size() - 1));
+
+                if (characteristics.size() > 0) {
+                    requesReadCharacteristics(gatt);
+                } else {
+                    gatt.disconnect();
+                }
+            }
         }
 
         @Override
