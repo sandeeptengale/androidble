@@ -1,4 +1,4 @@
-package admin.parimargin.com.androidble;
+package com.sandeep.androidble;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -87,6 +87,7 @@ public class DeviceDetailsActivity extends AppCompatActivity{
             characteristics.add(services.get(3).getCharacteristics().get(1));
             characteristics.add(services.get(3).getCharacteristics().get(2));
             requesReadCharacteristics(gatt);
+            requesReadCharacteristics(gatt);
         }
 
         public void requesReadCharacteristics(BluetoothGatt gatt) {
@@ -102,7 +103,7 @@ public class DeviceDetailsActivity extends AppCompatActivity{
                 if (characteristics.size() > 0) {
                     requesReadCharacteristics(gatt);
                 } else {
-                    gatt.disconnect();
+                    //gatt.disconnect();
                 }
             }
         }
